@@ -1,5 +1,4 @@
 from __future__ import print_function
-
 import os
 import json
 import pickle
@@ -17,12 +16,12 @@ class ScoringService(object):
     returns topic probabilities based off of keyword
     heuristic in a data-frame format.
     '''
-
+    
     _TOPIC_NAMES = ['Reservoir', 'Trap', 'Charge', 'Seal', 'Other']
 
     _TOPIC_TERMS = [['porosity', 'permeability', 'sorting', 'maturity', 'reservoir', 'diagenesis', 'facies', 'lithofacies'],
                        ['trap', 'closure', 'structure', 'timing', 'traps'],
-                       ['maturity', 'migration', 'charge', 'dhi', 'expulsion', 'show', 'seeps', 'toc', 'kerogen', 'pay', 'oil', 'gas', 'condensate', 'contact', 'kitchen'],
+                       ['maturity', 'migration', 'charge', 'dhi', 'expulsion', 'show', 'seeps', 'toc', 'kerogen'],
                        ['seal', 'caprock', 'pressure', 'faulted', 'thief', 'leaky']
                       ]
 
@@ -47,14 +46,10 @@ class ScoringService(object):
 
     @classmethod
     def predict(cls, input):
-
         docs = pd.Series(input, index=range(len(input))).to_frame('Text')
-
         doc_topic_dist = pd.DataFrame()
-
         for idx, topic in enumerate(cls._TOPIC_NAMES[:-1]):
             doc_topic_dist[topic] = docs.apply(cls._search_terms, topic_idx = idx, axis=1)
-
         doc_topic_dist['Other'] = doc_topic_dist.apply(cls._search_other, axis=1)
         doc_topic_dist = doc_topic_dist.apply(cls._normalize, axis=1)
         doc_topic_dist['Topic'] = doc_topic_dist.apply(np.argmax, axis=1)
